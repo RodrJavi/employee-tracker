@@ -12,15 +12,55 @@ const db = sql.createConnection(
 );
 
 const viewDepartments = () => {
+  db.query("SELECT * FROM department", (err, data) => {
+    if (err) throw err;
+    console.table(data);
+    showOptionList();
+  });
+};
+
+const viewRoles = () => {
   db.query(
-    "SELECT department.name as Departments FROM department",
+    "SELECT role.title AS Titles, role.id AS role_id, department.name AS department, role.salary FROM role JOIN department ON role.department_id = department.id",
     (err, data) => {
       if (err) throw err;
       console.table(data);
+      showOptionList();
     }
   );
 };
 
+const viewEmployees = () => {
+  db.query(
+    "SELECT employee.id, first_name, last_name, role.title as role, department.name as department, role.salary FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id",
+    (err, data) => {
+      if (err) throw err;
+      console.table(data);
+      showOptionList();
+    }
+  );
+};
+
+const addDepartment = () => {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "departmentName",
+        message: "What is the name of this new department?",
+      },
+    ])
+    .then((answer) => {
+      db.query(
+        `INSERT INTO department (name) VALUES ("${answer.departmentName}")`,
+        (err, data) => {
+          if (err) throw err;
+          console.log(`New department named "${answer.departmentName}" added!`);
+          showOptionList();
+        }
+      );
+    });
+};
 const showOptionList = () => {
   inquirer
     .prompt([
@@ -40,9 +80,25 @@ const showOptionList = () => {
       },
     ])
     .then((answer) => {
-      if (answer.action == "View all departments") {
-        viewDepartments();
-        console.log("look at these depts");
+      switch (answer.action) {
+        case "View all departments": {
+          viewDepartments();
+          break;
+        }
+
+        case "View all roles": {
+          viewRoles();
+          break;
+        }
+
+        case "View all employees": {
+          viewEmployees();
+          break;
+        }
+
+        case "Add a department": {
+          addDepartment();
+        }
       }
     });
 };
