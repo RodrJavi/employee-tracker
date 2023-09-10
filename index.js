@@ -32,7 +32,7 @@ const viewRoles = () => {
 
 const viewEmployees = () => {
   db.query(
-    "SELECT employee.id, first_name, last_name, role.title as role, department.name as department, role.salary FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id",
+    "SELECT employee.id, employee.first_name, employee.last_name, role.title as role, department.name as department, role.salary, CONCAT(manager.first_name, ' ', manager.last_name) as Manager FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id LEFT JOIN employee AS manager ON employee.manager_id = manager.id",
     (err, data) => {
       if (err) throw err;
       console.table(data);
